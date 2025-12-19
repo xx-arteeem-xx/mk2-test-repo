@@ -62,21 +62,21 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
-        // Ключ для хранения заметок в sessionStorage
+        // Ключ для хранения заметок в localStorage
         const STORAGE_KEY = 'simple_notes_app_notes';
         
-        // Функция для загрузки заметок из sessionStorage
+        // Функция для загрузки заметок из localStorage
         function loadNotesFromStorage() {
-            const storedNotes = sessionStorage.getItem(STORAGE_KEY);
+            const storedNotes = localStorage.getItem(STORAGE_KEY);
             return storedNotes ? JSON.parse(storedNotes) : [];
         }
         
-        // Функция для сохранения заметок в sessionStorage
+        // Функция для сохранения заметок в localStorage
         function saveNotesToStorage(notes) {
-            sessionStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
         }
         
-        // Массив для хранения заметок (загружается из sessionStorage)
+        // Массив для хранения заметок (загружается из localStorage)
         let notes = loadNotesFromStorage();
         // ID редактируемой заметки (null, если создается новая)
         let editingNoteId = null;
@@ -100,7 +100,7 @@
                 notes.unshift({ id, title, content });
             }
             
-            // Сохраняем заметки в sessionStorage
+            // Сохраняем заметки в localStorage
             saveNotesToStorage(notes);
             
             // Очищаем форму
@@ -135,7 +135,7 @@
         function deleteNote(noteId) {
             if (confirm('Вы уверены, что хотите удалить эту заметку?')) {
                 notes = notes.filter(note => note.id !== noteId);
-                // Сохраняем обновленный массив заметок в sessionStorage
+                // Сохраняем обновленный массив заметок в localStorage
                 saveNotesToStorage(notes);
                 renderNotes();
             }
