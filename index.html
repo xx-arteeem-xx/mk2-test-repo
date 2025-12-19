@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Простой сервис заметок</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #212529;
+            color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .note-card {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .note-card:hover {
+            transform: translateY(-5px);
+        }
+        .container {
+            max-width: 800px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-4">
+        <h1 class="text-center mb-4"><i class="fas fa-sticky-note me-2"></i>Мои заметки</h1>
+        
+        <!-- Форма для создания/редактирования заметки -->
+        <div class="card bg-dark border-secondary mb-4">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-edit me-2"></i>
+                    <span id="formTitle">Новая заметка</span>
+                </h5>
+                <form id="noteForm">
+                    <div class="mb-3">
+                        <label for="noteTitle" class="form-label">Заголовок</label>
+                        <input type="text" class="form-control bg-dark text-light border-secondary" id="noteTitle" placeholder="Введите заголовок" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="noteContent" class="form-label">Текст заметки</label>
+                        <textarea class="form-control bg-dark text-light border-secondary" id="noteContent" rows="4" placeholder="Введите текст заметки" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Сохранить
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Контейнер для карточек заметок -->
+        <div id="notesContainer" class="row g-3">
+            <!-- Здесь будут отображаться заметки -->
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Массив для хранения заметок
+        let notes = [];
+        // ID редактируемой заметки (null, если создается новая)
+        let editingNoteId = null;
+
+        // Функция для сохранения заметки
+        function saveNote(event) {
+            event.preventDefault();
+            
+            const title = document.getElementById('noteTitle').value;
+            const content = document.getElementById('noteContent').value;
+            
+            if (editingNoteId) {
+                // Обновляем существующую заметку
+                const index = notes.findIndex(note => note.id === editingNoteId);
+                if (index !== -1) {
+                    notes[index] = { id: editingNoteId, title, content };
+                }
+            } else {
+                // Создаем новую заметку
+                const id = Date.now(); // Простой способ создания уникального ID
+                notes.unshift({ id, title, content });
+            }
+            
+            // Очищаем форму
+            clearForm();
+            // Перерисовываем заметки
+            renderNotes();
+        }
+
+        // Функция для очистки формы
+        function clearForm() {
+            document.getElementById('noteTitle').value = '';
+            document.getElementById('noteContent').value = '';
+            document.getElementById('formTitle').textContent = 'Новая заметка';
+            editingNoteId = null;
+        }
+
+        // Функция для загрузки заметки в форму
+        function loadNoteToForm(noteId) {
+            const note = notes.find(note => note.id === noteId);
+            if (note) {
+                document.getElementById('noteTitle').value = note.title;
+                document.getElementById('noteContent').value = note.content;
+                document.getElementById('formTitle').textContent = 'Редактирование заметки';
+                editingNoteId = noteId;
+                
+                // Прокручиваем к форме
+                document.getElementById('noteForm').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Функция для отображения заметок
+        function renderNotes() {
+            const container = document.getElementById('notesContainer');
+            container.innerHTML = '';
+            
+            notes.forEach(note => {
+                const preview = note.content.length > 10 ? note.content.substring(0, 10) + '...' : note.content;
+                
+                const noteCard = document.createElement('div');
+                noteCard.className = 'col-md-6 col-lg-4';
+                noteCard.innerHTML = `
+                    <div class="card note-card bg-dark border-secondary h-100" data-note-id="${note.id}">
+                        <div class="card-body">
+                            <h5 class="card-title">${note.title}</h5>
+                            <p class="card-text">${preview}</p>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(noteCard);
+            });
+            
+            // Добавляем обработчики событий для карточек
+            document.querySelectorAll('.note-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const noteId = parseInt(this.getAttribute('data-note-id'));
+                    loadNoteToForm(noteId);
+                });
+            });
+        }
+
+        // Инициализация при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            // Назначаем обработчик для формы
+            document.getElementById('noteForm').addEventListener('submit', saveNote);
+            
+            // Инициализируем отображение заметок
+            renderNotes();
+        });
+    </script>
+</body>
+</html>
